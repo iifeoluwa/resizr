@@ -12,5 +12,8 @@
 */
 
 $app->get('/', function () use ($app) {
-    return $app->version();
+	$res = $app->version();
+    return "Resizer Bot running on $res";
 });
+
+$app->get('webhook/twitter', 'AuthController@twitter');
