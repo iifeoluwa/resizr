@@ -17,7 +17,7 @@ class AuthController extends Controller
         if ($request->isMethod('get') && $request->has('crc_token')) {
             
             $crc = $request->input('crc_token');
-            echo $secret = env("TWITTER_API_SECRET");
+            $secret = env("TWITTER_API_SECRET");
             $hashDigest = base64_encode(hash_hmac('sha256', $crc, $secret, true));
             $response = ['response_token' => $hashDigest];
 
