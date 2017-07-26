@@ -14,8 +14,17 @@ class AuthController extends Controller
      */
     public function twitter(Request $request)
     {
-        print_r($request->all());
+        if ($request->isMethod('get') && $request->has('crc_token')) {
+            
+            $crc = $request->input('crc_token');
+            echo $secret = env("TWITTER_API_SECRET");
+            $hashDigest = base64_encode(hash_hmac('sha256', $crc, $secret, true));
+            $response = ['response_token' => $hashDigest];
 
-        return 'Twitter, Yaay!';
+            return json_encode($response);
+        }
+
+        $message = ['status' => 'error', 'message' => 'Missing required params'];
+        return json_encode($message);
     }
 }
