@@ -19,7 +19,7 @@ class AuthController extends Controller
             $crc = $request->input('crc_token');
             $secret = env("TWITTER_API_SECRET");
             $hashDigest = base64_encode(hash_hmac('sha256', $crc, $secret, true));
-            $response = ['response_token' => $hashDigest];
+            $response = ['response_token' => 'sha256=' . $hashDigest];
 
             return json_encode($response);
         }
