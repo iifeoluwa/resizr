@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class AuthController extends Controller
+class TwitterWebhookController extends Controller
 {
     /**
      * Handles requests to the Twitter Webhook
@@ -12,7 +12,7 @@ class AuthController extends Controller
      * @param Request $request 
      * @return Object
      */
-    public function twitter(Request $request)
+    public function verifyCrcToken(Request $request)
     {
         if ($request->isMethod('get') && $request->has('crc_token')) {
             
