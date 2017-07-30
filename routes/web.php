@@ -17,4 +17,4 @@ $app->get('/', function () use ($app) {
 });
 
 $app->get('webhook/twitter', 'TwitterWebhookController@verifyCrcToken');
-$app->post('webhook/twitter', 'TwitterWebhookController@handleEvents');
+$app->post('webhook/twitter', 'TwitterWebhookController@handleDMEvents');
