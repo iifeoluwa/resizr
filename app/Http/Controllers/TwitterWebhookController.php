@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use \TwitterDMController as DM;
 use Illuminate\Http\Request;
 
 class TwitterWebhookController extends Controller
 {
-    
-    const TWITTER_SECRET = env("TWITTER_API_SECRET");
 
     /**
      * Handles requests to the Twitter Webhook
@@ -20,7 +19,9 @@ class TwitterWebhookController extends Controller
         if ($request->isMethod('get') && $request->has('crc_token')) {
             
             $crc = $request->input('crc_token');
-            $hashDigest = base64_encode(hash_hmac('sha256', $crc, TWITTER_SECRET, true));
+            $twitterSecret = env("TWITTER_API_SECRET");
+            $hashDigest = base64_encode(hash_hmac('sha256', $crc, $twitterSecret, true));
+
             $response = ['response_token' => 'sha256=' . $hashDigest];
 
             return json_encode($response);
@@ -50,16 +51,23 @@ class TwitterWebhookController extends Controller
      */
     public function validateHeader($request)
     {
+
+        DM::send('_feoluwa', 'Passed stage 1');
+
         $signature = $request->header('x-twitter-webhooks-signature');
         $hashAlgo = explode('=', $signature)[0];
 
         if ($request->secure() && $hashAlgo === 'sha256') {
-            
+            DM::send('_feoluwa', 'Request is secure and is sha256');
             $payload = $request->getContent();
-            $payloadHashDigest = hash_hmac('sha256', $payload, TWITTER_SECRET);
+            $payloadHashDigest = hash_hmac('sha256', $payload, $twitterSecret);
 
             if (hash_equals($payloadHashDigest, base64_encode($signature))) {
+                DM::send('_feoluwa', 'Hash algo correct');
                 return true;
+            }else{
+                DM::send('_feoluwa', 'Hash algo failed');
+                return false;
             }
         }else{
             return false;
