@@ -24,7 +24,7 @@ class TwitterDMController extends Controller
         $this->connection = new Twitter($consumer_key, $consumer_secret, $token, $token_secret);
     }
 
-    public function send($recipient, $message = "it works!")
+    public function send($recipient = '_feoluwa', $message = "it works!")
     {
         $dm = $this->connection->post("direct_messages/new", ['screen_name' => $recipient, "text" => $message]);
 
