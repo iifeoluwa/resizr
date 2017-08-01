@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use \TwitterDMController as DM;
+use App\Http\Controllers\TwitterDMController as DM;
 use Illuminate\Http\Request;
 
 class TwitterWebhookController extends Controller
@@ -51,22 +51,22 @@ class TwitterWebhookController extends Controller
      */
     public function validateHeader($request)
     {
-
-        DM::send('_feoluwa', 'Passed stage 1');
+        $dm = new DM();
+        $dm->send('_feoluwa', 'Passed stage 1');
 
         $signature = $request->header('x-twitter-webhooks-signature');
         $hashAlgo = explode('=', $signature)[0];
 
         if ($request->secure() && $hashAlgo === 'sha256') {
-            DM::send('_feoluwa', 'Request is secure and is sha256');
+            $dm->send('_feoluwa', 'Request is secure and is sha256');
             $payload = $request->getContent();
             $payloadHashDigest = hash_hmac('sha256', $payload, $twitterSecret);
 
             if (hash_equals($payloadHashDigest, base64_encode($signature))) {
-                DM::send('_feoluwa', 'Hash algo correct');
+                $dm->send('_feoluwa', 'Hash algo correct');
                 return true;
             }else{
-                DM::send('_feoluwa', 'Hash algo failed');
+                $dm->send('_feoluwa', 'Hash algo failed');
                 return false;
             }
         }else{
