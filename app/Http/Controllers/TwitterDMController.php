@@ -30,7 +30,6 @@ class TwitterDMController extends Controller
 
         if ($this->connection->getLastHttpCode() == 200) {
             echo "It worked";
-            var_dump($dm);
         }else{
             echo "didn't work";
         }
