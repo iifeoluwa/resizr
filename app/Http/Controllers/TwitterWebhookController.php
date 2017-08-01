@@ -51,8 +51,8 @@ class TwitterWebhookController extends Controller
      */
     public function validateHeader($request)
     {
-        $dm = new DM();
-        $dm->send('_feoluwa', 'Passed stage 1');
+        // $dm = new DM();
+        // $dm->send('_feoluwa', $request->getContent());
 
         $signature = $request->header('x-twitter-webhooks-signature');
         $hashAlgo = explode('=', $signature)[0];

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Abraham\TwitterOAuth\TwitterOAuth as Twitter;
+use Illuminate\Http\Request;
 
 class TwitterDMController extends Controller
 {
@@ -24,9 +25,10 @@ class TwitterDMController extends Controller
         $this->connection = new Twitter($consumer_key, $consumer_secret, $token, $token_secret);
     }
 
-    public function send($recipient = '_feoluwa', $message = "it works!")
+    public function send($recipient = '_feoluwa', $message = "it works!", Request $req)
     {
-        $dm = $this->connection->post("direct_messages/new", ['screen_name' => $recipient, "text" => $message]);
+        var_dump($req->json()->all());
+        $dm = $this->connection->post("direct_messages/new", ['screen_name' => $recipient, "text" => $req->getContent()]);
 
         if ($this->connection->getLastHttpCode() == 200) {
             echo "It worked";
