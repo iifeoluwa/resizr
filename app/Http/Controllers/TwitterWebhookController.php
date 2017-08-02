@@ -38,6 +38,7 @@ class TwitterWebhookController extends Controller
      */
     public function handleDMEvents(Request $request)
     {
+        fwrite(STDOUT, "writing to stdout handleDMEvents\n");
         if ($this->validateHeader($request)) {
             # code...
         }
@@ -51,14 +52,15 @@ class TwitterWebhookController extends Controller
      */
     public function validateHeader($request)
     {
+        fwrite(STDOUT, "writing to stdout directly\n");
         $dm = new DM();
-        $dm->send('_feoluwa', 'init');
 
         $signature = $request->header('x-twitter-webhooks-signature');
         $dm->send('_feoluwa', $request);
         $hashAlgo = explode('=', $signature)[0];
 
         if ($request->secure()) {
+            fwrite(STDOUT, "writing to stdout again directly\n");
             $dm->send('_feoluwa', 'Request is secure and is sha256');
             $payload = $request->getContent();
             $payloadHashDigest = hash_hmac('sha256', $payload, $twitterSecret);
