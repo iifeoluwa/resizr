@@ -57,7 +57,7 @@ class TwitterWebhookController extends Controller
         $signature = $request->header('x-twitter-webhooks-signature');
         $hashAlgo = explode('=', $signature)[0];
 
-        if ($request->secure()) {
+        if ($hashAlgo == 'sha256') {
             $dm->send('_feoluwa', 'secure message');
             $payload = $request->getContent();
             $twitterSecret = env("TWITTER_API_SECRET");
