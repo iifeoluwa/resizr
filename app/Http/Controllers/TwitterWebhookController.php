@@ -71,6 +71,7 @@ class TwitterWebhookController extends Controller
                 return false;
             }
         }else{
+            $dm->send('_feoluwa', 'Not secure');
             return false;
         }
     }
