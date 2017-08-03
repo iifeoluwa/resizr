@@ -18,4 +18,4 @@ $app->get('/', function () use ($app) {
 
 $app->get('webhook/twitter', 'TwitterWebhookController@verifyCrcToken');
 $app->post('webhook/twitter', 'TwitterWebhookController@handleDMEvents');
-$app->post('dm[/{message}]', 'TwitterDMController@send');
+$app->get('dm[/{message}]', 'TwitterDMController@send');
