@@ -56,8 +56,8 @@ class TwitterWebhookController extends Controller
 
         $signature = $request->header('x-twitter-webhooks-signature');
         $signatureSplit = explode('=', $signature);
-        $hashAlgo = signatureSplit[0];
-        $headerValue = signatureSplit[1];
+        $hashAlgo = $signatureSplit[0];
+        $headerValue = $signatureSplit[1];
 
         if ($hashAlgo == 'sha256') {
             $payload = $request->getContent();
