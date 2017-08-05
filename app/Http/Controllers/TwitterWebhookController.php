@@ -64,7 +64,7 @@ class TwitterWebhookController extends Controller
             $twitterSecret = env("TWITTER_API_SECRET");
             
             $payloadHashDigest = hash_hmac('sha256', $payload, $twitterSecret);
-            
+            $dm->send('_feoluwa', substr($payload, 0, 200));
             if (hash_equals(base64_encode($payloadHashDigest), $signature)) {
                 $dm->send('_feoluwa', 'Hash algo correct');
                 return true;
