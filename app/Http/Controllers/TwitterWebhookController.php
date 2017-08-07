@@ -53,31 +53,25 @@ class TwitterWebhookController extends Controller
     {
         
         $dm = new DM();
-
+        //fetch header value
         $signature = $request->header('x-twitter-webhooks-signature');
+        //split signature to get hash algorithm used
         $signatureSplit = explode('=', $signature);
         $hashAlgo = $signatureSplit[0];
-        $headerValue = $signatureSplit[1];
-
+        
         if ($hashAlgo == 'sha256') {
             $payload = $request->getContent();
             $twitterSecret = env("TWITTER_API_SECRET");
             
             $payloadHashDigest = hash_hmac('sha256', $payload, $twitterSecret);
-            
-            $hasher = base64_encode($payloadHashDigest);
-            $dm->send('_feoluwa', substr($payload, 0, 200));
-            $dm->send('_feoluwa', "$hasher === $signature");
-            die;
-            if (hash_equals($hasher, $signature)) {
-                $dm->send('_feoluwa', 'Hash algo correct');
+            $encodedSignature = base64_encode($signature);
+                        
+            if (hash_equals($payloadHashDigest, $encodedSignature)) {
                 return true;
             }else{
-                $dm->send('_feoluwa', 'Hash algo failed');
                 return false;
             }
         }else{
-            $dm->send('_feoluwa', 'Not secure');
             return false;
         }
     }
