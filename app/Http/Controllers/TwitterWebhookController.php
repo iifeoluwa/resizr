@@ -38,8 +38,12 @@ class TwitterWebhookController extends Controller
      */
     public function handleDMEvents(Request $request)
     {
-        if ($this->validateHeader($request)) {
-            # code...
+        // if ($this->validateHeader($request)) {
+        //     # code...
+        // }
+        if ($request->isJson()) {
+            $data = $request->json()->all();
+            $
         }
     }
 
