@@ -16,6 +16,16 @@ $app->get('/', function () use ($app) {
     return "Resizer Bot running on $res";
 });
 
+$app->get('/ya', function () use ($app) {
+	$dbh = new PDO("pgsql:dbname=dms;host=127.0.0.1", "postgres", "admin");
+
+if($dbh) {
+   echo 'connected';
+} else {
+    echo 'there has been an error connecting';
+} 
+});
+
 $app->get('webhook/twitter', 'TwitterWebhookController@verifyCrcToken');
 $app->post('webhook/twitter', 'TwitterWebhookController@handleDMEvents');
 $app->get('dm[/{message}]', 'TwitterDMController@send');
