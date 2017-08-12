@@ -15,7 +15,8 @@ class CreateDmEventsTable extends Migration
     {
         Schema::create('dm', function (Blueprint $table) {
             $table->increments('id');
-            $table->timestamps();
+            $table->integer('dm_event_id')->unique();
+            $table->enum('status', ['Success', 'Failed']);
         });
     }
 
