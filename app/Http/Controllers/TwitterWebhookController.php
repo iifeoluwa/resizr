@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\TwitterDMController as DM;
+use App\Http\Controllers\TwitterDMController as DMS;
 use Illuminate\Http\Request;
+use App\DM;
 
 class TwitterWebhookController extends Controller
 {
@@ -42,8 +43,19 @@ class TwitterWebhookController extends Controller
         //     # code...
         // }
         if ($request->isJson()) {
+
             $data = $request->json()->all();
-            $
+            //fetch dm event id
+            $event_id = (int) $data['direct_message_events'][0]['id'];
+            $event_record = DM::where('dm_event_id', $event_id)->first();
+            $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];            
+            $twitter_id = (int) env("TWITTER_ID");
+
+            if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
+                //check if image is present
+                
+            }
+            
         }
     }
 
@@ -56,7 +68,7 @@ class TwitterWebhookController extends Controller
     public function validateHeader($request)
     {
         
-        $dm = new DM();
+        $dm = new DMS();
         //fetch header value
         $signature = $request->header('x-twitter-webhooks-signature');
         //split signature to get hash algorithm used
