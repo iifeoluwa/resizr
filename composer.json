@@ -9,7 +9,8 @@
         "laravel/lumen-framework": "5.4.*",
         "vlucas/phpdotenv": "~2.2",
         "abraham/twitteroauth": "^0.7.4",
-        "jenssegers/mongodb": "^3.2"
+        "jenssegers/mongodb": "^3.2",
+        "cloudinary/cloudinary_php": "^1.8"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
