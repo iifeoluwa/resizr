@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Cloudinary;
+use CloudinaryField;
 use App\Http\Controllers\TwitterDMController as DMS;
 use Illuminate\Http\Request;
 use App\DM;
@@ -39,20 +41,27 @@ class TwitterWebhookController extends Controller
      */
     public function handleDMEvents(Request $request)
     {
-        // if ($this->validateHeader($request)) {
-        //     # code...
-        // }
         if ($request->isJson()) {
 
             $data = $request->json()->all();
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
             $event_record = DM::where('dm_event_id', $event_id)->first();
-            $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];            
+            $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];          
             $twitter_id = (int) env("TWITTER_ID");
 
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
-                //check if image is present
+                
+                $attachment = $data['direct_message_events'][0]['message_create']['message_data']['attachment'];
+
+                //check if incoming event contains an image
+                if ($this->imageIsPresent($attachment)) {
+                    $image_url = $attachment['media'][0]['media_url'];
+                    $cloud = new CloudinaryField;
+                    $mod = ["width" => 400, "height" => 400, "crop" => "fill", "public_id" => $sender_id];
+                    $cloud->upload('https://pbs.twimg.com/media/DHg-CKWUIAEMW3I.jpg', $mod);
+                    var_dump(Cloudinary::cloudinary_url("$sender_id.jpg"));
+                }
                 
             }
             
@@ -90,5 +99,18 @@ class TwitterWebhookController extends Controller
         }else{
             return false;
         }
+    }
+
+    /**
+     * [imageIsPresent description]
+     * @param  [type] $mediaObject [description]
+     * @return [type]              [description]
+     */
+    public function imageIsPresent($attachment)
+    {
+        $attachment_type = $attachment['type'];
+        $media_type = $attachment['media'][0]['type'];
+
+        return ($attachment_type == 'media' && $media_type == 'photo') ? true : false;
     }
 }
