@@ -11,6 +11,19 @@ use App\DM;
 class TwitterWebhookController extends Controller
 {
 
+    protected $consumer_key;
+    protected $api_secret;
+    protected $token_secret;
+    protected $token;
+
+    function __construct($foo = null)
+    {
+        $this->consumer_key = env('TWITTER_API_KEY');
+        $this->api_secret = env("TWITTER_API_SECRET");
+        $this->token_secret = env("TWITTER_SECRET");
+        $this->token = env("TWITTER_ACCESS_TOKEN");
+    }
+
     /**
      * Handles requests to the Twitter Webhook
      * 
@@ -57,6 +70,8 @@ class TwitterWebhookController extends Controller
                 //check if incoming event contains an image
                 if ($this->imageIsPresent($attachment)) {
                     $image_url = $attachment['media'][0]['media_url'];
+                    $this->saveProtectedImgToTemp($image_url);
+                    die;
                     $cloud = new CloudinaryField;
                     $mod = ["width" => 400, "height" => 400, "crop" => "fill", "public_id" => $sender_id];
                     $cloud->upload('https://pbs.twimg.com/media/DHg-CKWUIAEMW3I.jpg', $mod);
@@ -112,5 +127,49 @@ class TwitterWebhookController extends Controller
         $media_type = $attachment['media'][0]['type'];
 
         return ($attachment_type == 'media' && $media_type == 'photo') ? true : false;
+    }
+
+    /**
+     * Make authenticated request to fetch Twitter DM image and store temporarily
+     * @param  [type] $imgUrl [description]
+     * @return [type]         [description]
+     */
+    public function saveProtectedImgToTemp($imgUrl)
+    {
+        $nonce = mt_rand();
+        
+        $encoded_url = urlencode($imgUrl);
+        $encoded_consumer_secret = urlencode($this->api_secret);
+        $encoded_token_secret = urlencode($this->token_secret);
+
+        $base_string = "GET&$encoded_url";
+        $signing_key = "$encoded_consumer_secret&$encoded_token_secret";
+
+        $signature = base64_encode(hash_hmac('sha1', $base_string, $signing_key));
+
+        $timestamp = time();
+
+        $authorization = "oauth_consumer_key='$this->consumer_key',";
+        $authorization = $authorization . "oauth_nonce='$nonce',oauth_signature_method='HMAC-SHA1',oauth_signature='$signature',";
+        $authorization = $authorization . "oauth_timestamp=$timestamp,oauth_token='$this->token',oauth_version='1.0'";
+        
+        $header[] = 'Authorization: OAuth ' . urlencode($authorization);
+        var_dump($header);
+        $handle = curl_init($imgUrl);
+        $base = base_path();
+        $fp = fopen("$base/tmp/images/1.png", 'wb');
+
+        curl_setopt($handle, CURLOPT_FILE, $fp);
+        curl_setopt($handle, CURLOPT_HTTPHEADER, $header);
+
+        if (curl_exec($handle) === false) {
+            echo 'Curl error: ' . curl_error($handle);
+        }else{
+            echo "string";
+        }
+        
+        curl_close($handle);
+        fclose($fp);
+
     }
 }
