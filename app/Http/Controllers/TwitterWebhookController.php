@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use OAuth;
+use App\DM;
 use Cloudinary;
 use CloudinaryField;
-use App\Http\Controllers\TwitterDMController as DMS;
 use Illuminate\Http\Request;
-use App\DM;
+use App\Http\Controllers\TwitterController as Twitter;
 
 class TwitterWebhookController extends Controller
 {
@@ -16,13 +16,17 @@ class TwitterWebhookController extends Controller
     protected $api_secret;
     protected $token_secret;
     protected $token;
+    protected $image_location;
 
     function __construct($foo = null)
     {
+        $base = base_path();
+
         $this->consumer_key = env('TWITTER_API_KEY');
         $this->api_secret = env("TWITTER_API_SECRET");
         $this->token_secret = env("TWITTER_SECRET");
         $this->token = env("TWITTER_ACCESS_TOKEN");
+        $this->temp_location = "$base/tmp/images/";
     }
 
     /**
@@ -54,7 +58,7 @@ class TwitterWebhookController extends Controller
      * @return [type]           [description]
      */
     public function handleDMEvents(Request $request)
-    {
+    {        
         if ($request->isJson()) {
 
             $data = $request->json()->all();
@@ -72,11 +76,19 @@ class TwitterWebhookController extends Controller
                 if ($this->imageIsPresent($attachment)) {
                     $image_url = $attachment['media'][0]['media_url'];
                     $this->saveProtectedImgToTemp($image_url, $sender_id);
-                    die;
+                    
                     $cloud = new CloudinaryField;
-                    $mod = ["width" => 400, "height" => 400, "crop" => "fill", "public_id" => $sender_id];
-                    $cloud->upload('https://pbs.twimg.com/media/DHg-CKWUIAEMW3I.jpg', $mod);
-                    var_dump(Cloudinary::cloudinary_url("$sender_id.jpg"));
+
+                    $mod = [
+                        "width" => 400, 
+                        "height" => 400, 
+                        "crop" => "fill", 
+                        "public_id" => $sender_id, 
+                        "quality" => 60
+                    ];
+
+                    $cloud->upload("$this->temp_location$sender_id.png", $mod);
+                    $uploaded_img_url = Cloudinary::cloudinary_url("$sender_id.jpg");
                 }
                 
             }
@@ -137,7 +149,7 @@ class TwitterWebhookController extends Controller
      */
     public function saveProtectedImgToTemp($imgUrl, $sender_id)
     {
-        $base = base_path();
+        
 
         $oauth = new OAuth($this->consumer_key, $this->api_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
         $oauth->setToken($this->token, $this->token_secret);
@@ -146,6 +158,6 @@ class TwitterWebhookController extends Controller
         $oauth->enableDebug();
         $oauth->fetch($imgUrl);
 
-        file_put_contents("$base/tmp/images/$sender_id.png", $oauth->getLastResponse());
+        file_put_contents("$this->temp_location$sender_id.png", $oauth->getLastResponse());
     }
 }

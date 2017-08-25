@@ -27,6 +27,21 @@ $app->withFacades();
 
 $app->withEloquent();
 
+$app->configureMonologUsing(function($monolog) {
+
+$infoHandler = new Monolog\Handler\StreamHandler( storage_path("logs/info.log"), Monolog\Logger::INFO, false);
+$noticeHandler = new Monolog\Handler\StreamHandler( storage_path("/logs/notice.log"), Monolog\Logger::NOTICE, false);
+
+
+$monolog->pushHandler($infoHandler);
+$monolog->pushHandler($noticeHandler);
+
+$infoHandler->setFormatter(new \Monolog\Formatter\LineFormatter(null, null, true));
+$noticeHandler->setFormatter(new \Monolog\Formatter\LineFormatter(null, null, true));
+
+return $monolog;
+});
+
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
