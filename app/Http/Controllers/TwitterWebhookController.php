@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use OAuth;
 use Cloudinary;
 use CloudinaryField;
 use App\Http\Controllers\TwitterDMController as DMS;
@@ -70,7 +71,7 @@ class TwitterWebhookController extends Controller
                 //check if incoming event contains an image
                 if ($this->imageIsPresent($attachment)) {
                     $image_url = $attachment['media'][0]['media_url'];
-                    $this->saveProtectedImgToTemp($image_url);
+                    $this->saveProtectedImgToTemp($image_url, $sender_id);
                     die;
                     $cloud = new CloudinaryField;
                     $mod = ["width" => 400, "height" => 400, "crop" => "fill", "public_id" => $sender_id];
@@ -134,42 +135,17 @@ class TwitterWebhookController extends Controller
      * @param  [type] $imgUrl [description]
      * @return [type]         [description]
      */
-    public function saveProtectedImgToTemp($imgUrl)
+    public function saveProtectedImgToTemp($imgUrl, $sender_id)
     {
-        $nonce = mt_rand();
-        
-        $encoded_url = urlencode($imgUrl);
-        $encoded_consumer_secret = urlencode($this->api_secret);
-        $encoded_token_secret = urlencode($this->token_secret);
-
-        $base_string = "GET&$encoded_url";
-        $signing_key = "$encoded_consumer_secret&$encoded_token_secret";
-
-        $signature = base64_encode(hash_hmac('sha1', $base_string, $signing_key));
-
-        $timestamp = time();
-
-        $authorization = "oauth_consumer_key='$this->consumer_key',";
-        $authorization = $authorization . "oauth_nonce='$nonce',oauth_signature_method='HMAC-SHA1',oauth_signature='$signature',";
-        $authorization = $authorization . "oauth_timestamp=$timestamp,oauth_token='$this->token',oauth_version='1.0'";
-        
-        $header[] = 'Authorization: OAuth ' . urlencode($authorization);
-        var_dump($header);
-        $handle = curl_init($imgUrl);
         $base = base_path();
-        $fp = fopen("$base/tmp/images/1.png", 'wb');
 
-        curl_setopt($handle, CURLOPT_FILE, $fp);
-        curl_setopt($handle, CURLOPT_HTTPHEADER, $header);
+        $oauth = new OAuth($this->consumer_key, $this->api_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
+        $oauth->setToken($this->token, $this->token_secret);
 
-        if (curl_exec($handle) === false) {
-            echo 'Curl error: ' . curl_error($handle);
-        }else{
-            echo "string";
-        }
-        
-        curl_close($handle);
-        fclose($fp);
+        $oauth->disableSSLChecks();
+        $oauth->enableDebug();
+        $oauth->fetch($imgUrl);
 
+        file_put_contents("$base/tmp/images/$sender_id.png", $oauth->getLastResponse());
     }
 }
