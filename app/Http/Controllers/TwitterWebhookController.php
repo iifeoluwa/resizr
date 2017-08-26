@@ -8,7 +8,7 @@ use App\DM as DMEvents;
 use Cloudinary;
 use CloudinaryField;
 use Illuminate\Http\Request;
-use App\Constants\ErrorMessages;
+use App\Constants\Messages;
 use App\Http\Controllers\TwitterController as Twitter;
 
 class TwitterWebhookController extends Controller
@@ -96,15 +96,17 @@ class TwitterWebhookController extends Controller
                         $twitter->uploadImage($sender_id, $uploaded_img_url);
                     } catch (\Exception $e) {
                         $error_info = ["message" => $e->getMessage(), "twitter_user" => $sender_id, "event_id" => $event_id];
-                        Log::info(ErrorMessages::UNABLE_TO_UPLOAD_IMAGE, $error_info);
+                        Log::info(Messages::UNABLE_TO_UPLOAD_IMAGE, $error_info);
                     }
 
                     $twitter_image_id = $twitter->uploadImage($sender_id, $uploaded_img_url);
 
                     if ($twitter->sendDM($sender_id, $twitter_image_id)) {
                         DMEvents::updateStatus($event_id, 'Success');
+                        Log::info(Messages::DM_SEND_SUCCESS, ["twitter_user" => $sender_id, "event_id" => $event_id]);
                     }else{
                         DMEvents::updateStatus($event_id, 'Failed');
+                        Log::info(Messages::DM_SEND_FAILURE, ["twitter_user" => $sender_id, "event_id" => $event_id]);
                     }
 
                     
