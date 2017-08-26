@@ -30,7 +30,7 @@ $app->withEloquent();
 $app->configureMonologUsing(function($monolog) {
 
 $infoHandler = new Monolog\Handler\StreamHandler( storage_path("logs/info.log"), Monolog\Logger::INFO, false);
-$noticeHandler = new Monolog\Handler\StreamHandler( storage_path("/logs/notice.log"), Monolog\Logger::NOTICE, false);
+$noticeHandler = new Monolog\Handler\StreamHandler( storage_path("logs/notice.log"), Monolog\Logger::NOTICE, false);
 
 $monolog->pushHandler(new \Monolog\Handler\StreamHandler('php://stderr', \Monolog\Logger::WARNING));
 $monolog->pushHandler($infoHandler);

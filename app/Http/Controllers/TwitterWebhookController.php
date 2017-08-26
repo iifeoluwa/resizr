@@ -60,7 +60,8 @@ class TwitterWebhookController extends Controller
      * @return [type]           [description]
      */
     public function handleDMEvents(Request $request)
-    {   Log::warning('Request received');
+    {   
+        Log::warning('Request received');
         if ($request->isJson()) {
 
             $data = $request->json()->all();
