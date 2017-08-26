@@ -36,6 +36,15 @@
     "scripts": {
         "post-root-package-install": [
             "php -r \"copy('.env.example', '.env');\""
+        ],
+        "post-install-cmd": [
+        "Illuminate\\Foundation\\ComposerScripts::postInstall",
+        "composer dump-autoload -o",
+        "php artisan migrate --force"
+        ],
+        "post-update-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postUpdate",
+            "composer dump-autoload -o"
         ]
     },
     "minimum-stability": "dev",
