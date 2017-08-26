@@ -66,10 +66,12 @@ class TwitterWebhookController extends Controller
             $data = $request->json()->all();
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
+            Log::info(Messages::STARTING_TRANSFORMATION);
             $event_record = DMEvents::where('dm_event_id', $event_id)->first();
             $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];          
             $twitter_id = (int) env("TWITTER_ID");
-
+            $log_info = ["twitter_user" => $sender_id, "event_id" => $event_id];
+            Log::info(Messages::CHECK_DM, $log_info);
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
                 
                 $cloud = new CloudinaryField;

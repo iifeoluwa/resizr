@@ -14,4 +14,8 @@ class Messages
 	
 	const DM_SEND_FAILURE = 'Unable to send image to user. Sending failed.';
 
+	const STARTING_TRANSFORMATION = 'Begin init proceess for the twitter user';
+
+	const CHECK_DM = 'Making DB query to confirm that event hasnt been proceessed already';
+
 }
