@@ -1,1 +1,1 @@
-web: vendor/bin/heroku-php-apache2 public/ -l ./storage/logs/notice.log -l ./storage/logs/info.log
+web: vendor/bin/heroku-php-apache2 public/ -l ./storage/logs/notice.log
