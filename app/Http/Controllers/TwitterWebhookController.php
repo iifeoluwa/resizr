@@ -62,15 +62,15 @@ class TwitterWebhookController extends Controller
     public function handleDMEvents(Request $request)
     {   
 
-        error_log('Request Received');
         if ($request->isJson()) {
             error_log('Fetching Json Request as array');
             $data = $request->json()->all();
+
             //error_log(json_encode($data));
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
             error_log("Succfully fetched event_id $event_id");
-            echo(Messages::STARTING_TRANSFORMATION);
+            error_log(Messages::STARTING_TRANSFORMATION);
             error_log("Checking for event in db");
             $event_record = DMEvents::where('dm_event_id', $event_id)->first();
             $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];          
@@ -87,7 +87,7 @@ class TwitterWebhookController extends Controller
                 //check if incoming event contains an image
                 error_log("checking for image attachment");
                 if ($this->imageIsPresent($attachment)) {
-                    $image_url = $attachment['media'][0]['media_url'];
+                    $image_url = $attachment['media']['media_url'];
                     error_log("image url is $image_url");
                     $mod = [
                         "width" => 400, 
@@ -166,7 +166,7 @@ class TwitterWebhookController extends Controller
     public function imageIsPresent($attachment)
     {
         $attachment_type = $attachment['type'];
-        $media_type = $attachment['media'][0]['type'];
+        $media_type = $attachment['media']['type'];
         error_log("$attachment_type and $media_type");
         return ($attachment_type == 'media' && $media_type == 'photo') ? true : false;
     }
