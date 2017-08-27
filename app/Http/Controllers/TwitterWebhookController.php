@@ -7,8 +7,10 @@ use OAuth;
 use App\DM as DMEvents;
 use Cloudinary;
 use CloudinaryField;
+use Cloudinary\Api as CloudinaryAdmin;
 use Illuminate\Http\Request;
 use App\Constants\Messages;
+use App\Constants\ResponseMessages;
 use App\Http\Controllers\TwitterController as Twitter;
 
 class TwitterWebhookController extends Controller
@@ -63,48 +65,34 @@ class TwitterWebhookController extends Controller
     {   
 
         if ($request->isJson()) {
-            error_log('Fetching Json Request as array');
             $data = $request->json()->all();
-
-            //error_log(json_encode($data));
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
-            error_log("Succfully fetched event_id $event_id");
-            error_log(Messages::STARTING_TRANSFORMATION);
-            error_log("Checking for event in db");
             $event_record = DMEvents::where('dm_event_id', $event_id)->first();
             $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];          
             $twitter_id = (int) env("TWITTER_ID");
             $log_info = ["twitter_user" => $sender_id, "event_id" => $event_id];
-            error_log("pre db check for sender $sender_id");
+            
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
-                error_log("event doesnt exist in db; sender is $sender_id");
-                $cloud = new CloudinaryField;
+                
                 $twitter = new Twitter;
 
                 $attachment = $data['direct_message_events'][0]['message_create']['message_data']['attachment'];
 
                 //check if incoming event contains an image
-                error_log("checking for image attachment");
                 if ($this->imageIsPresent($attachment)) {
                     $image_url = $attachment['media']['media_url'];
-                    error_log("image url is $image_url");
-                    $mod = [
-                        "width" => 400, 
-                        "height" => 400, 
-                        "crop" => "fill", 
-                        "public_id" => $sender_id, 
-                        "quality" => 60
-                    ];
-
+                    
                     try {
                         $this->saveProtectedImgToTemp($image_url, $sender_id);
-                        $cloud->upload("$this->temp_location$sender_id.png", $mod);
-                        $uploaded_img_url = Cloudinary::cloudinary_url("$sender_id.jpg");
+                        $uploaded_img_url = $this->uploadToCloudinary($sender_id, $image_url);
                         $twitter->uploadImage($sender_id, $uploaded_img_url);
                     } catch (\Exception $e) {
-                        $error_info = ["message" => $e->getMessage(), "twitter_user" => $sender_id, "event_id" => $event_id];
+                        $error_info = array_merge($log_info, ["message" => $e->getMessage()]);
+                        error_log(Messages::UNABLE_TO_UPLOAD_IMAGE . "|| User: $sender_id || error:" . $e->getMessage());
                         Log::info(Messages::UNABLE_TO_UPLOAD_IMAGE, $error_info);
+                        $twitter->sendDM($sender_id, null, ResponseMessages::UNABLE_TO_COMPLETE);
+                        die;
                     }
 
                     $twitter_image_id = $twitter->uploadImage($sender_id, $uploaded_img_url);
@@ -117,7 +105,7 @@ class TwitterWebhookController extends Controller
                         Log::info(Messages::DM_SEND_FAILURE, $log_info);
                     }
 
-                    
+                    $this->cleanUp($sender_id);
                 }
                 
             }
@@ -167,7 +155,6 @@ class TwitterWebhookController extends Controller
     {
         $attachment_type = $attachment['type'];
         $media_type = $attachment['media']['type'];
-        error_log("$attachment_type and $media_type");
         return ($attachment_type == 'media' && $media_type == 'photo') ? true : false;
     }
 
@@ -177,7 +164,8 @@ class TwitterWebhookController extends Controller
      * @return [type]         [description]
      */
     public function saveProtectedImgToTemp($imgUrl, $sender_id)
-    {                
+    {    
+        $filename = "$this->temp_location$sender_id.png";
         $oauth = new OAuth($this->consumer_key, $this->api_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
         $oauth->setToken($this->token, $this->token_secret);
 
@@ -185,6 +173,35 @@ class TwitterWebhookController extends Controller
         $oauth->enableDebug();
         $oauth->fetch($imgUrl);
 
-        file_put_contents("$this->temp_location$sender_id.png", $oauth->getLastResponse());
+        if (file_exists($filename)) {
+            unlink($filename);
+        }
+
+        file_put_contents($filename, $oauth->getLastResponse());
+    }
+
+    public function uploadToCloudinary($public_id, $image_url)
+    {
+        $cloud = new CloudinaryField;
+        $admin = new CloudinaryAdmin;
+
+        $mod = [
+                "width" => 400, 
+                "height" => 400, 
+                "crop" => "fill", 
+                "public_id" => $public_id, 
+                "quality" => 60
+            ];
+
+        $result = $admin->resource($public_id);
+
+        //remove existing resource with that public id
+        if ($result->rate_limit_allowed) {
+            $remove_resouce = $admin->delete_resources($public_id);
+        }
+        
+       $cloud->upload("$this->temp_location$public_id.png", $mod);
+       
+        return Cloudinary::cloudinary_url("$public_id.jpg");
     }
 }

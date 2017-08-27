@@ -37,9 +37,9 @@ class TwitterController extends Controller
        }
     }
 
-    public function sendDM($recipient, $image_id)
+    public function sendDM($recipient, $image_id = null, $message = null)
     {
-        $param = $this->buildDMParam($recipient, $image_id);
+        $param = $this->buildDMParam($recipient, $image_id, $message);
         $dm = $this->connection->post("direct_messages/events/new", $param, true);
 
         if ($this->connection->getLastHttpCode() == 200) {
@@ -49,7 +49,7 @@ class TwitterController extends Controller
        return false;
     }
 
-    public function buildDMParam($recipient, $media_id)
+    public function buildDMParam($recipient, $media_id = null, $message = null)
     {
         $params = [
             "event" => [
@@ -59,7 +59,7 @@ class TwitterController extends Controller
                         "recipient_id" => $recipient
                     ],
                     "message_data" => [
-                        "text" => ResponseMessages::RESIZE_COMPLETE,
+                        "text" => $message === null ? ResponseMessages::RESIZE_COMPLETE : $message,
                         "attachment" => [
                             "type" => "media",
                             "media" => [
