@@ -73,7 +73,7 @@ class TwitterWebhookController extends Controller
             $event_record = DMEvents::where('dm_event_id', $event_id)->first();
             $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];          
             error_log($sender_id);
-            die;
+            
             $twitter_id = (int) env("TWITTER_ID");
             $log_info = ["twitter_user" => $sender_id, "event_id" => $event_id];
             
