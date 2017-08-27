@@ -7,12 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DM extends Model
 {
 
-    protected $table;
-
-    public function __construct()
-    {
-    	$this->table = env("DB_DATABASE");
-    }
+    protected $table = 'dm';
 
     public static function updateStatus($event_id, $status)
     {
