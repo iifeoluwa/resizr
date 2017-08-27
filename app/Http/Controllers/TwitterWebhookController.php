@@ -66,7 +66,7 @@ class TwitterWebhookController extends Controller
         if ($request->isJson()) {
             error_log('Fetching Json Request as array');
             $data = $request->json()->all();
-            error_log(json_encode($data));
+            //error_log(json_encode($data));
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
             error_log("Succfully fetched event_id $event_id");
@@ -125,21 +125,6 @@ class TwitterWebhookController extends Controller
         }
     }
 
-    public function rayToStr($separator,$array)
-    {
-        $temp = '';
-
-
-       foreach($array as $key=>$item){
-           $temp .=  $item; 
-           if($key != sizeof($array)-1){
-                $temp .= $separator  ; 
-           }
-       }//end of the foreach loop
-
-       return $temp;
-    }
-
     /**
      * Validate request header. This is to ensure that the request originated from a trusted source.
      * According to the Twitter API Validation rules.
@@ -182,7 +167,7 @@ class TwitterWebhookController extends Controller
     {
         $attachment_type = $attachment['type'];
         $media_type = $attachment['media'][0]['type'];
-
+        error_log("$attachment_type and $media_type");
         return ($attachment_type == 'media' && $media_type == 'photo') ? true : false;
     }
 
