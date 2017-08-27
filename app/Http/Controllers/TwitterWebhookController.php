@@ -74,7 +74,7 @@ class TwitterWebhookController extends Controller
             $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];          
             $twitter_id = (int) env("TWITTER_ID");
             $log_info = $log_info;
-            
+            error_log("pre db check for sender $sender_id");
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
                 error_log("event doesnt exist in db; sender is $sender_id");
                 $cloud = new CloudinaryField;
