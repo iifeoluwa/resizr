@@ -73,7 +73,7 @@ class TwitterWebhookController extends Controller
             $event_record = DMEvents::where('dm_event_id', $event_id)->first();
             $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];          
             $twitter_id = (int) env("TWITTER_ID");
-            $log_info = $log_info;
+            $log_info = ["twitter_user" => $sender_id, "event_id" => $event_id];
             error_log("pre db check for sender $sender_id");
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
                 error_log("event doesnt exist in db; sender is $sender_id");
