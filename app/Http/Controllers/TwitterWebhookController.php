@@ -61,29 +61,32 @@ class TwitterWebhookController extends Controller
      */
     public function handleDMEvents(Request $request)
     {   
-        Log::warning('Request received');
+        error_log('Request Received');
         if ($request->isJson()) {
-
+            error_log('Fetching Json Request as array');
             $data = $request->json()->all();
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
-            Log::warning(Messages::STARTING_TRANSFORMATION);
+            error_log("Succfully fetched event_id $event_id");
+            echo(Messages::STARTING_TRANSFORMATION);
+            error_log("Checking for event in db");
             $event_record = DMEvents::where('dm_event_id', $event_id)->first();
             $sender_id = $data['direct_message_events'][0]['message_create']['sender_id'];          
             $twitter_id = (int) env("TWITTER_ID");
-            $log_info = ["twitter_user" => $sender_id, "event_id" => $event_id];
-            Log::warning(Messages::CHECK_DM, $log_info);
+            $log_info = $log_info;
+            
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
-                
+                error_log("event doesnt exist in db; sender is $sender_id");
                 $cloud = new CloudinaryField;
                 $twitter = new Twitter;
 
                 $attachment = $data['direct_message_events'][0]['message_create']['message_data']['attachment'];
 
                 //check if incoming event contains an image
+                error_log("checking for image attachment");
                 if ($this->imageIsPresent($attachment)) {
                     $image_url = $attachment['media'][0]['media_url'];
-                                       
+                    error_log("image url is $image_url");
                     $mod = [
                         "width" => 400, 
                         "height" => 400, 
@@ -106,10 +109,10 @@ class TwitterWebhookController extends Controller
 
                     if ($twitter->sendDM($sender_id, $twitter_image_id)) {
                         DMEvents::updateStatus($event_id, 'Success');
-                        Log::info(Messages::DM_SEND_SUCCESS, ["twitter_user" => $sender_id, "event_id" => $event_id]);
+                        Log::info(Messages::DM_SEND_SUCCESS, $log_info);
                     }else{
                         DMEvents::updateStatus($event_id, 'Failed');
-                        Log::info(Messages::DM_SEND_FAILURE, ["twitter_user" => $sender_id, "event_id" => $event_id]);
+                        Log::info(Messages::DM_SEND_FAILURE, $log_info);
                     }
 
                     
