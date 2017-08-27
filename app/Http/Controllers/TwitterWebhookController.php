@@ -85,7 +85,9 @@ class TwitterWebhookController extends Controller
                     
                     try {
                         $this->saveProtectedImgToTemp($image_url, $sender_id);
+                        error_log("saved to temp");
                         $uploaded_img_url = $this->uploadToCloudinary($sender_id, $image_url);
+                        error_log("got url $uploaded_img_url");
                         $twitter->uploadImage($sender_id, $uploaded_img_url);
                     } catch (\Exception $e) {
                         $error_info = array_merge($log_info, ["message" => $e->getMessage()]);
