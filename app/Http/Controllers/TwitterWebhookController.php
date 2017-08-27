@@ -194,10 +194,11 @@ class TwitterWebhookController extends Controller
             ];
 
         $result = $admin->resource($public_id);
-
+        error_log(json_encode($result));
         //remove existing resource with that public id
         if ($result->rate_limit_allowed) {
             $remove_resouce = $admin->delete_resources($public_id);
+            error_log(json_encode($remove_resouce));
         }
         
        $cloud->upload("$this->temp_location$public_id.png", $mod);
