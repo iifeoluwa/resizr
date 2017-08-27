@@ -61,10 +61,12 @@ class TwitterWebhookController extends Controller
      */
     public function handleDMEvents(Request $request)
     {   
+
         error_log('Request Received');
         if ($request->isJson()) {
             error_log('Fetching Json Request as array');
             $data = $request->json()->all();
+            error_log($this->rayToStr('==', $data));
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
             error_log("Succfully fetched event_id $event_id");
@@ -121,6 +123,21 @@ class TwitterWebhookController extends Controller
             }
             
         }
+    }
+
+    public function rayToStr($separator,$array)
+    {
+        $temp = '';
+
+
+       foreach($array as $key=>$item){
+           $temp .=  $item; 
+           if($key != sizeof($array)-1){
+                $temp .= $separator  ; 
+           }
+       }//end of the foreach loop
+
+       return $temp;
     }
 
     /**
