@@ -173,7 +173,7 @@ class TwitterWebhookController extends Controller
         $oauth->fetch($imgUrl);
 
         if (file_exists($filename)) {
-            unlink($filename);
+            unlink(realpath($filename));
         }
 
         file_put_contents($filename, $oauth->getLastResponse());
