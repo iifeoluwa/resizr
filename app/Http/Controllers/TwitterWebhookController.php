@@ -66,6 +66,8 @@ class TwitterWebhookController extends Controller
 
         if ($request->isJson()) {
             $data = $request->json()->all();
+            error_log(json_encode($data));
+            die;
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
             $event_record = DMEvents::where('dm_event_id', $event_id)->first();
