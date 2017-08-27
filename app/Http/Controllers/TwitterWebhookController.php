@@ -88,7 +88,7 @@ class TwitterWebhookController extends Controller
                         $uploaded_img_url = $this->uploadToCloudinary($sender_id);
                         error_log("got url $uploaded_img_url");
                         $twitter_image_id = $twitter->uploadImage($sender_id, $uploaded_img_url);
-                        error_log("image uploaded to twitter $twitter_image_id");
+                        error_log("image: $uploaded_img_url uploaded to twitter $twitter_image_id");
                     } catch (\Exception $e) {
                         $error_info = array_merge($log_info, ["message" => $e->getMessage()]);
                         error_log(Messages::UNABLE_TO_UPLOAD_IMAGE . "|| User: $sender_id || error:" . $e->getMessage());
@@ -164,6 +164,7 @@ class TwitterWebhookController extends Controller
     public function saveProtectedImgToTemp($imgUrl, $sender_id)
     {    
         $filename = "$this->temp_location$sender_id.png";
+        error_log("image location is $filename");
         $oauth = new OAuth($this->consumer_key, $this->api_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
         $oauth->setToken($this->token, $this->token_secret);
 
@@ -176,6 +177,7 @@ class TwitterWebhookController extends Controller
         }
 
         file_put_contents($filename, $oauth->getLastResponse());
+        error_log("image is stored at $filename");
     }
 
     public function uploadToCloudinary($public_id)
@@ -188,7 +190,7 @@ class TwitterWebhookController extends Controller
                 "height" => 400, 
                 "crop" => "fill", 
                 "public_id" => $public_id, 
-                "quality" => 60
+                "quality" => 80
             ];
         
         try {

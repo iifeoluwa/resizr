@@ -29,11 +29,11 @@ class TwitterController extends Controller
 
     public function uploadImage($recipient, $image_url)
     {
-        $params = ['media' => $image_url, "media_category" => "dm_image", "media_type" => "image/png"];
+        $params = ['media' => $image_url];
         $media = $this->connection->upload('media/upload', $params);
 
         if ($this->connection->getLastHttpCode() == 200) {
-            return $media->media_id;
+            return $media->media_id_string;
        }
     }
 
