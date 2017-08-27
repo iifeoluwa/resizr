@@ -82,11 +82,10 @@ class TwitterWebhookController extends Controller
                 //check if incoming event contains an image
                 if ($this->imageIsPresent($attachment)) {
                     $image_url = $attachment['media']['media_url'];
-                    
+          
                     try {
                         $this->saveProtectedImgToTemp($image_url, $sender_id);
-                        error_log("saved to temp");
-                        $uploaded_img_url = $this->uploadToCloudinary($sender_id, $image_url);
+                        $uploaded_img_url = $this->uploadToCloudinary($sender_id);
                         error_log("got url $uploaded_img_url");
                         $twitter->uploadImage($sender_id, $uploaded_img_url);
                     } catch (\Exception $e) {
@@ -105,9 +104,7 @@ class TwitterWebhookController extends Controller
                     }else{
                         DMEvents::updateStatus($event_id, 'Failed');
                         Log::info(Messages::DM_SEND_FAILURE, $log_info);
-                    }
-
-                    $this->cleanUp($sender_id);
+                    }                    
                 }
                 
             }
@@ -182,7 +179,7 @@ class TwitterWebhookController extends Controller
         file_put_contents($filename, $oauth->getLastResponse());
     }
 
-    public function uploadToCloudinary($public_id, $image_url)
+    public function uploadToCloudinary($public_id)
     {
         $cloud = new CloudinaryField;
         $admin = new CloudinaryAdmin;
@@ -194,17 +191,21 @@ class TwitterWebhookController extends Controller
                 "public_id" => $public_id, 
                 "quality" => 60
             ];
-
-        $result = $admin->resource($public_id);
-        error_log(json_encode($result));
-        //remove existing resource with that public id
-        if ($result->rate_limit_allowed) {
-            $remove_resouce = $admin->delete_resources($public_id);
-            error_log(json_encode($remove_resouce));
-        }
         
-       $cloud->upload("$this->temp_location$public_id.png", $mod);
-       
+        try {
+            $result = $admin->resource($public_id);
+
+            if ($result->rate_limit_allowed) {
+                $remove_resouce = $admin->delete_resources($public_id);
+                error_log(json_encode($remove_resouce));
+            }
+            $cloud->upload("$this->temp_location$public_id.png", $mod);
+        } catch (\Exception $e) {
+            if ($e instanceof NotFound) {
+                $cloud->upload("$this->temp_location$public_id.png", $mod);
+            }
+        }
+
         return Cloudinary::cloudinary_url("$public_id.jpg");
     }
 }
