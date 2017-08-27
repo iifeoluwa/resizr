@@ -66,7 +66,7 @@ class TwitterWebhookController extends Controller
         if ($request->isJson()) {
             error_log('Fetching Json Request as array');
             $data = $request->json()->all();
-            error_log($this->rayToStr('==', $data));
+            error_log(json_encode($data));
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
             error_log("Succfully fetched event_id $event_id");
