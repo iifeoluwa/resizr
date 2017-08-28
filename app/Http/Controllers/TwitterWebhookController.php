@@ -172,11 +172,9 @@ class TwitterWebhookController extends Controller
         $oauth->enableDebug();
         $oauth->fetch($imgUrl);
 
-        if (file_exists($filename)) {
-            unlink(realpath($filename));
-        }
-
-        file_put_contents($filename, $oauth->getLastResponse());
+        $handle = fopen($filename, "wa+");
+        fwrite($handle, $oauth->getLastResponse());
+        fclose($handle);
         error_log("image is stored at $filename");
     }
 
