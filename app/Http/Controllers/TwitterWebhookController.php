@@ -24,7 +24,7 @@ class TwitterWebhookController extends Controller
 
     function __construct($foo = null)
     {
-        $base = base_path();
+        $base = public_path();
 
         $this->consumer_key = env('TWITTER_API_KEY');
         $this->api_secret = env("TWITTER_API_SECRET");
@@ -63,7 +63,7 @@ class TwitterWebhookController extends Controller
      */
     public function handleDMEvents(Request $request)
     {   
-        $root = base_path();
+        $root = public_path();
         error_log("document root is $root");
         if ($request->isJson()) {
             $data = $request->json()->all();            
