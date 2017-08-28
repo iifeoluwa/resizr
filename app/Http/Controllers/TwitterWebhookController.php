@@ -30,7 +30,7 @@ class TwitterWebhookController extends Controller
         $this->api_secret = env("TWITTER_API_SECRET");
         $this->token_secret = env("TWITTER_SECRET");
         $this->token = env("TWITTER_ACCESS_TOKEN");
-        $this->temp_location = "$base/tmp/images/";
+        $this->temp_location = "$base/tmp/";
     }
 
     /**
