@@ -73,4 +73,14 @@ class TwitterController extends Controller
 
         return $params;
     }
+
+    public function test()
+    {
+        
+        $parameters = [
+            'status' => 'Meow Meow Meow',
+            'media_ids' => '902155928430051331'
+        ];
+        $result = $connection->post('statuses/update', $parameters);
+    }
 }

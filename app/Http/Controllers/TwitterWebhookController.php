@@ -104,6 +104,7 @@ class TwitterWebhookController extends Controller
                     }
                     error_log("sending image to user $sender_id and image: $twitter_image_id");
                     if ($twitter->sendDM($sender_id, $twitter_image_id)) {
+                        $twitter->test();
                         DMEvents::updateStatus($event_id, 'Success');
                         Log::info(Messages::DM_SEND_SUCCESS, $log_info);
                     }else{
@@ -172,7 +173,7 @@ class TwitterWebhookController extends Controller
         if (!is_dir($this->temp_location)) {
             mkdir($this->temp_location);
         }
-        
+
         $filename = "$this->temp_location$sender_id.png";
         error_log("image location is $filename");
         $oauth = new OAuth($this->consumer_key, $this->api_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
