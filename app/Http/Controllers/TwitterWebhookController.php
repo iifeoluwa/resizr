@@ -63,7 +63,8 @@ class TwitterWebhookController extends Controller
      */
     public function handleDMEvents(Request $request)
     {   
-        error_log("document root is $_SERVER['DOCUMENT_ROOT']");
+        $root = $_SERVER['DOCUMENT_ROOT'];
+        error_log("document root is $root");
         if ($request->isJson()) {
             $data = $request->json()->all();            
             //fetch dm event id
