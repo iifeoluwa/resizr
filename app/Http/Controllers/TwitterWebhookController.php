@@ -105,6 +105,7 @@ class TwitterWebhookController extends Controller
                     error_log("sending image to user $sender_id and image: $twitter_image_id");
                     if ($twitter->sendDM($sender_id, $twitter_image_id)) {
                         $twitter->test();
+                        error_log('update posted');
                         DMEvents::updateStatus($event_id, 'Success');
                         Log::info(Messages::DM_SEND_SUCCESS, $log_info);
                     }else{
