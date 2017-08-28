@@ -169,6 +169,10 @@ class TwitterWebhookController extends Controller
      */
     public function saveProtectedImgToTemp($imgUrl, $sender_id)
     {    
+        if (!is_dir($this->temp_location)) {
+            mkdir($this->temp_location);
+        }
+        
         $filename = "$this->temp_location$sender_id.png";
         error_log("image location is $filename");
         $oauth = new OAuth($this->consumer_key, $this->api_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
