@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Log;
 use OAuth;
 use App\DM as DMEvents;
-use Cloudinary;
 use CloudinaryField;
 use Cloudinary\Api as CloudinaryAdmin;
 use Illuminate\Http\Request;
@@ -200,21 +199,10 @@ class TwitterWebhookController extends Controller
                 "public_id" => $public_id, 
                 "quality" => 80
             ];
+
+        $cloud->upload("$this->temp_location$public_id.png", $mod);
+        $resource = (array) $admin->resource($public_id);
         
-        try {
-            $result = $admin->resource($public_id);
-
-            if ($result->rate_limit_allowed) {
-                $remove_resouce = $admin->delete_resources($public_id);
-                error_log(json_encode($remove_resouce));
-            }
-            $cloud->upload("$this->temp_location$public_id.png", $mod);
-        } catch (\Exception $e) {
-            if ($e instanceof NotFound) {
-                $cloud->upload("$this->temp_location$public_id.png", $mod);
-            }
-        }
-
-        return Cloudinary::cloudinary_url("$public_id.jpg");
+        return $resource['url'];
     }
 }
