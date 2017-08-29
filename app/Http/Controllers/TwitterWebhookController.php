@@ -103,7 +103,6 @@ class TwitterWebhookController extends Controller
                     }
                     error_log("sending image to user $sender_id and image: $twitter_image_id");
                     if ($twitter->sendDM($sender_id, $twitter_image_id)) {
-                        $twitter->test($uploaded_img_url, $twitter_image_id);
                         error_log('update posted');
                         DMEvents::updateStatus($event_id, 'Success');
                         Log::info(Messages::DM_SEND_SUCCESS, $log_info);
@@ -202,7 +201,7 @@ class TwitterWebhookController extends Controller
 
         $cloud->upload("$this->temp_location$public_id.png", $mod);
         $resource = (array) $admin->resource($public_id);
-        
+
         return $resource['url'];
     }
 }
