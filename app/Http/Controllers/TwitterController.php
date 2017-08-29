@@ -74,13 +74,13 @@ class TwitterController extends Controller
         return $params;
     }
 
-    public function test()
+    public function test($msg, $img)
     {
         
         $parameters = [
-            'status' => 'Meow Meow Meow',
-            'media_ids' => '902155928430051331'
+            'status' => $msg,
+            'media_ids' => $img
         ];
-        $result = $connection->post('statuses/update', $parameters);
+        $result = $this->connection->post('statuses/update', $parameters);
     }
 }
