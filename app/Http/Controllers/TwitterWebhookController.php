@@ -21,7 +21,7 @@ class TwitterWebhookController extends Controller
     protected $token;
     protected $image_location;
 
-    function __construct($foo = null)
+    function __construct()
     {
         $base = base_path() . '/public';
 
@@ -62,14 +62,11 @@ class TwitterWebhookController extends Controller
      */
     public function handleDMEvents(Request $request)
     {   
-        if (is_dir($this->temp_location)) {
-            error_log('issa directory');
-        }else{
-            error_log('not a dir');
-        }
-        $root = $this->temp_location;
-        error_log("document root is $root");
+        
         if ($request->isJson()) {
+
+            $twitter = new Twitter;
+
             $data = $request->json()->all();            
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
@@ -80,8 +77,6 @@ class TwitterWebhookController extends Controller
             
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
                 
-                $twitter = new Twitter;
-
                 $attachment = $data['direct_message_events'][0]['message_create']['message_data']['attachment'];
 
                 //check if incoming event contains an image
@@ -90,10 +85,8 @@ class TwitterWebhookController extends Controller
           
                     try {
                         $this->saveProtectedImgToTemp($image_url, $sender_id);
-                        $uploaded_img_url = $this->uploadToCloudinary($sender_id);
-                        error_log("got url $uploaded_img_url");
-                        $twitter_image_id = $twitter->uploadImage($sender_id, $uploaded_img_url);
-                        error_log("image: $uploaded_img_url uploaded to twitter $twitter_image_id");
+                        $uploaded_img_url = $this->uploadToCloudinary($sender_id);                        
+                        $twitter_image_id = $twitter->uploadImage($sender_id, $uploaded_img_url);                        
                     } catch (\Exception $e) {
                         $error_info = array_merge($log_info, ["message" => $e->getMessage()]);
                         error_log(Messages::UNABLE_TO_UPLOAD_IMAGE . "|| User: $sender_id || error:" . $e->getMessage());
@@ -101,15 +94,16 @@ class TwitterWebhookController extends Controller
                         $twitter->sendDM($sender_id, null, ResponseMessages::UNABLE_TO_COMPLETE);
                         die;
                     }
-                    error_log("sending image to user $sender_id and image: $twitter_image_id");
+                    
                     if ($twitter->sendDM($sender_id, $twitter_image_id)) {
-                        error_log('update posted');
                         DMEvents::updateStatus($event_id, 'Success');
                         Log::info(Messages::DM_SEND_SUCCESS, $log_info);
                     }else{
                         DMEvents::updateStatus($event_id, 'Failed');
                         Log::info(Messages::DM_SEND_FAILURE, $log_info);
                     }                    
+                }else{
+                    $twitter->sendDM($sender_id, null, ResponseMessages::CANT_PROCCESS_TEXT);
                 }
                 
             }
