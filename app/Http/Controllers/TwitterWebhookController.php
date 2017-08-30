@@ -74,7 +74,7 @@ class TwitterWebhookController extends Controller
             $sender_id = (int) $data['direct_message_events'][0]['message_create']['sender_id'];            
             $twitter_id = (int) env("TWITTER_ID");
             $log_info = ["twitter_user" => $sender_id, "event_id" => $event_id];
-            
+            error_log(json_encode($data));
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
                 
                 $attachment = $data['direct_message_events'][0]['message_create']['message_data']['attachment'];
