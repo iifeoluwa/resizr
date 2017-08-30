@@ -95,7 +95,7 @@ class TwitterWebhookController extends Controller
                         die;
                     }
                     
-                    if ($twitter->sendDM($sender_id, $twitter_image_id)) {
+                    if ($twitter->sendDM($sender_id, $twitter_image_id, null)) {
                         DMEvents::updateStatus($event_id, 'Success');
                         Log::info(Messages::DM_SEND_SUCCESS, $log_info);
                     }else{
