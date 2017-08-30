@@ -45,7 +45,7 @@ class TwitterController extends Controller
         if ($this->connection->getLastHttpCode() == 200) {
             return true;
        }
-
+       
        return false;
     }
 
@@ -60,27 +60,16 @@ class TwitterController extends Controller
                     ],
                     "message_data" => [
                         "text" => $message === null ? ResponseMessages::RESIZE_COMPLETE : $message,
-                        "attachment" => [
-                            "type" => "media",
-                            "media" => [
-                                "id" => $media_id
-                            ]
                         ]
                     ]
                 ]
-            ]
-        ];
+            ];
 
+        if ($media_id !== null) {
+            $attachment = [ "type" => "media", "media" => [ "id" => $media_id ]];
+                        
+            $params['message_data']['attachment'] = $attachment;
+        }
         return $params;
-    }
-
-    public function test($msg, $img)
-    {
-        
-        $parameters = [
-            'status' => $msg,
-            'media_ids' => $img
-        ];
-        $result = $this->connection->post('statuses/update', $parameters);
     }
 }

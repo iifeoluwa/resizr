@@ -103,6 +103,7 @@ class TwitterWebhookController extends Controller
                         Log::info(Messages::DM_SEND_FAILURE, $log_info);
                     }                    
                 }else{
+                    DMEvents::updateStatus($event_id, 'Success');
                     $twitter->sendDM($sender_id, null, ResponseMessages::CANT_PROCCESS_TEXT);
                 }
                 
