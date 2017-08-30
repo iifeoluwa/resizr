@@ -39,7 +39,6 @@ class TwitterController extends Controller
 
     public function sendDM($recipient, $image_id = null, $message = null)
     {
-        error_log($image_id);
         $param = $this->buildDMParam($recipient, $image_id, $message);
         $dm = $this->connection->post("direct_messages/events/new", $param, true);
 
@@ -69,9 +68,9 @@ class TwitterController extends Controller
         if ($media_id !== null) {
             $attachment = [ "type" => "media", "media" => [ "id" => $media_id ]];
                         
-            $params['message_data']['attachment'] = $attachment;
+            $params['event']['message_create']['message_data']['attachment'] = $attachment;
         }
-        error_log(json_encode($params));
+
         return $params;
     }
 }

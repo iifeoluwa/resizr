@@ -169,7 +169,6 @@ class TwitterWebhookController extends Controller
         }
 
         $filename = "$this->temp_location$sender_id.png";
-        error_log("image location is $filename");
         $oauth = new OAuth($this->consumer_key, $this->api_secret, OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_AUTHORIZATION);
         $oauth->setToken($this->token, $this->token_secret);
 
@@ -178,7 +177,6 @@ class TwitterWebhookController extends Controller
         $oauth->fetch($imgUrl);
 
         file_put_contents($filename, $oauth->getLastResponse());
-        error_log("image is stored at $filename");
     }
 
     public function uploadToCloudinary($public_id)
