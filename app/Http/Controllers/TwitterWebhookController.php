@@ -67,17 +67,17 @@ class TwitterWebhookController extends Controller
 
             $twitter = new Twitter;
 
-            $data = $request->json()->all();            
+            $data = $request->json()->all();
             //fetch dm event id
             $event_id = (int) $data['direct_message_events'][0]['id'];
             $event_record = DMEvents::where('dm_event_id', $event_id)->first();
             $sender_id = (int) $data['direct_message_events'][0]['message_create']['sender_id'];            
             $twitter_id = (int) env("TWITTER_ID");
             $log_info = ["twitter_user" => $sender_id, "event_id" => $event_id];
-            error_log(json_encode($data));
+            
             if ($sender_id !== $twitter_id && (!$event_record || $event_record->status == 'Failed')) {
                 
-                $attachment = $data['direct_message_events'][0]['message_create']['message_data']['attachment'];
+                $attachment = $data['direct_message_events'][0]['message_create']['message_data']['attachment'] ?? null;
 
                 //check if incoming event contains an image
                 if ($attachment && $this->imageIsPresent($attachment)) {
@@ -103,7 +103,6 @@ class TwitterWebhookController extends Controller
                         Log::info(Messages::DM_SEND_FAILURE, $log_info);
                     }                    
                 }else{
-                    error_log(json_decode($data));
                     $twitter->sendDM($sender_id, null, ResponseMessages::CANT_PROCCESS_TEXT);
                 }
                 
