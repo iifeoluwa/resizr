@@ -80,7 +80,7 @@ class TwitterWebhookController extends Controller
                 $attachment = $data['direct_message_events'][0]['message_create']['message_data']['attachment'];
 
                 //check if incoming event contains an image
-                if ($this->imageIsPresent($attachment)) {
+                if ($attachment && $this->imageIsPresent($attachment)) {
                     $image_url = $attachment['media']['media_url'];
           
                     try {
